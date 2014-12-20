@@ -10,10 +10,10 @@
 
 @interface TNKeyValueObserve : NSObject <NSCopying, NSCoding>
 
-@property (readonly) id observee;
+@property (readonly) id object;
 @property (readonly, copy) NSDictionary *change;
 
-- (instancetype)initWithObservee:(id)observee change:(NSDictionary *)change;
+- (instancetype)initWithObject:(id)object change:(NSDictionary *)change;
 
 @end
 
@@ -23,9 +23,10 @@ typedef void (^TNKeyValueObserveBlock)(TNKeyValueObserve *observe);
 
 + (instancetype)defaultCenter;
 
-- (void)addObserver:(id)observer action:(SEL)action forObject:(id)anObject keyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options;
-- (void)addObserverForObject:(id)anObject keyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options handler:(TNKeyValueObserveBlock)handler;
+- (void)addObserver:(id)observer action:(SEL)action forObject:(id)object keyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options;
+- (void)removeObserver:(id)observer forObject:(id)object keyPath:(NSString *)keyPath;
 
-- (void)removeObserver:(id)observer forObject:(id)anObject keyPath:(NSString *)keyPath;
+- (id <NSObject>)addObserverForObject:(id)object keyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options handler:(TNKeyValueObserveBlock)handler;
+- (void)removeObserver:(id <NSObject>)observer forObject:(id)object;
 
 @end

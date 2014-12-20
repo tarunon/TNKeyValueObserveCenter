@@ -11,7 +11,7 @@
 
 @protocol TNKeyValueObserveActionProtocol
 @required
-- (void)performActionWithObservee:(id)observee change:(NSDictionary *)change;
+- (void)performActionWithObject:(id)object change:(NSDictionary *)change;
 
 @end
 
@@ -32,7 +32,7 @@
 
 @end
 
-@interface TNKeyValueObserveActionContainer : NSObject {
+@interface TNKeyValueObserveActionContainer : NSObject <NSFastEnumeration> {
     NSMutableDictionary *_container;
 }
 
@@ -60,9 +60,9 @@
     return self;
 }
 
-- (void)performActionWithObservee:(id)observee change:(NSDictionary *)change
+- (void)performActionWithObject:(id)object change:(NSDictionary *)change
 {
-    _handler([[TNKeyValueObserve alloc] initWithObservee:observee change:change]);
+    _handler([[TNKeyValueObserve alloc] initWithObject:object change:change]);
 }
 
 @end
@@ -78,9 +78,9 @@
     return self;
 }
 
-- (void)performActionWithObservee:(id)observee change:(NSDictionary *)change
+- (void)performActionWithObject:(id)object change:(NSDictionary *)change
 {
-    [_observer performSelector:_action withObject:[[TNKeyValueObserve alloc] initWithObservee:observee change:change]];
+    [_observer performSelector:_action withObject:[[TNKeyValueObserve alloc] initWithObject:object change:change]];
 }
 
 @end
@@ -129,14 +129,31 @@ static void *actionContainer_TNKeyValueObserveKey = &actionContainer_TNKeyValueO
     _container[key] = obj;
 }
 
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(__unsafe_unretained id [])buffer count:(NSUInteger)len
+{
+    NSUInteger bIdx = 0;
+    NSUInteger lIdx = state->state;
+    NSUInteger lLen = _container.count;
+    while (bIdx < len) {
+        if (lIdx >= lLen) {
+            break;
+        }
+        buffer[bIdx++] = _container.allValues[lIdx++];
+    }
+    state->state = lIdx;
+    state->itemsPtr = buffer;
+    state->mutationsPtr = (unsigned long *)(__bridge void *)self;
+    return bIdx;
+}
+
 @end
 
 @implementation TNKeyValueObserve
 
-- (instancetype)initWithObservee:(id)observee change:(NSDictionary *)change
+- (instancetype)initWithObject:(id)object change:(NSDictionary *)change
 {
     if (self = [super init]) {
-        _observee = observee;
+        _object = object;
         _change = change;
     }
     return self;
@@ -145,7 +162,7 @@ static void *actionContainer_TNKeyValueObserveKey = &actionContainer_TNKeyValueO
 - (id)initWithCoder:(NSCoder *)aDecoder
 {
     if (self = [super init]) {
-        _observee = [aDecoder decodeObjectForKey:@"observee"];
+        _object = [aDecoder decodeObjectForKey:@"object"];
         _change = [aDecoder decodeObjectForKey:@"change"];
     }
     return self;
@@ -153,12 +170,12 @@ static void *actionContainer_TNKeyValueObserveKey = &actionContainer_TNKeyValueO
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[TNKeyValueObserve allocWithZone:zone] initWithObservee:_observee change:_change.copy];
+    return [[TNKeyValueObserve allocWithZone:zone] initWithObject:_object change:_change.copy];
 }
 
 - (void)encodeWithCoder:(NSCoder *)aCoder
 {
-    [aCoder encodeObject:_observee forKey:@"observee"];
+    [aCoder encodeObject:_object forKey:@"object"];
     [aCoder encodeObject:_change forKey:@"change"];
 }
 
@@ -176,34 +193,45 @@ static void *actionContainer_TNKeyValueObserveKey = &actionContainer_TNKeyValueO
     return _defaultCenter;
 }
 
-- (NSMapTable *)actionsForObject:(id)anObject keyPath:(NSString *)keyPath
+- (NSMapTable *)actionsForObject:(id)object keyPath:(NSString *)keyPath
 {
-    TNKeyValueObserveActionContainer *container = [anObject actionContainer_TNKeyValueObserve];
+    TNKeyValueObserveActionContainer *container = [object actionContainer_TNKeyValueObserve];
     if (!container) {
-        [anObject setActionContainer_TNKeyValueObserve:(container = [[TNKeyValueObserveActionContainer alloc] init])];
+        [object setActionContainer_TNKeyValueObserve:(container = [[TNKeyValueObserveActionContainer alloc] init])];
     }
     NSMapTable *actions = container[keyPath];
     if (!actions) {
-        actions = container[keyPath] = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsWeakMemory valueOptions:NSPointerFunctionsStrongMemory];
+        actions = container[keyPath] = [NSMapTable weakToStrongObjectsMapTable];
     }
     return actions;
 }
 
-- (void)addObserver:(id)observer action:(SEL)action forObject:(id)anObject keyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options
+- (void)addObserver:(id)observer action:(SEL)action forObject:(id)object keyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options
 {
-    [anObject addObserver:self forKeyPath:keyPath options:options context:nil];
-    [[self actionsForObject:anObject keyPath:keyPath] setObject:[[TNKeyValueObserveAction alloc] initWithObserver:observer action:action] forKey:observer];
+    [object addObserver:self forKeyPath:keyPath options:options context:nil];
+    [[self actionsForObject:object keyPath:keyPath] setObject:[[TNKeyValueObserveAction alloc] initWithObserver:observer action:action] forKey:observer];
 }
 
-- (void)addObserverForObject:(id)anObject keyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options handler:(TNKeyValueObserveBlock)handler
+- (void)removeObserver:(id)observer forObject:(id)object keyPath:(NSString *)keyPath
 {
-    [anObject addObserver:self forKeyPath:keyPath options:options context:nil];
-    [[self actionsForObject:anObject keyPath:keyPath] setObject:[[TNKeyValueObserveHandler alloc] initWithHandler:handler] forKey:anObject];
+    [[self actionsForObject:object keyPath:keyPath] removeObjectForKey:observer];
 }
 
-- (void)removeObserver:(id)observer forObject:(id)anObject keyPath:(NSString *)keyPath
+- (id <NSObject>)addObserverForObject:(id)object keyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options handler:(TNKeyValueObserveBlock)handler
 {
-    [[anObject actionContainer_TNKeyValueObserve][keyPath] removeObjectForKey:observer];
+    [object addObserver:self forKeyPath:keyPath options:options context:nil];
+    TNKeyValueObserveHandler *observeHandler = [[TNKeyValueObserveHandler alloc] initWithHandler:handler];
+    [[self actionsForObject:object keyPath:keyPath] setObject:observeHandler forKey:object];
+    return observeHandler;
+}
+
+- (void)removeObserver:(id<NSObject>)observer forObject:(id)object
+{
+    for (NSMapTable *table in [object actionContainer_TNKeyValueObserve]) {
+        if ([table objectForKey:object] == observer) {
+            [table removeObjectForKey:object];
+        }
+    }
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -211,7 +239,7 @@ static void *actionContainer_TNKeyValueObserveKey = &actionContainer_TNKeyValueO
     NSMapTable *actions = [self actionsForObject:object keyPath:keyPath];
     for (id observer in actions) {
         id <TNKeyValueObserveActionProtocol> action = [actions objectForKey:observer];
-        [action performActionWithObservee:object change:change];
+        [action performActionWithObject:object change:change];
     }
 }
 
