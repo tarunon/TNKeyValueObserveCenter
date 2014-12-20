@@ -14,10 +14,17 @@ TNKeyValueObserve <-> NSNotification
 {
     [super viewDidLoad];
     
-    [[TNKeyValueObserveCenter defaultCenter] addObserverForObject:self.view keyPath:@"frame" options:NSKeyValueObservingOptionNew handler:^(TNKeyValueObserve *observe) {
+    [[TNKeyValueObserveCenter defaultCenter] addObserverForObject:self.view
+                                                          keyPath:@"frame"
+                                                          options:NSKeyValueObservingOptionNew
+                                                          handler:^(TNKeyValueObserve *observe) {
         NSLog(@"====== %@ frame changed(block): %@", observe.observee, observe.change);
     }];
-    [[TNKeyValueObserveCenter defaultCenter] addObserver:self action:@selector(viewFrameChanged:) forObject:self.view keyPath:@"frame" options:NSKeyValueObservingOptionNew];
+    [[TNKeyValueObserveCenter defaultCenter] addObserver:self
+                                                  action:@selector(viewFrameChanged:)
+                                               forObject:self.view
+                                                 keyPath:@"frame"
+                                                 options:NSKeyValueObservingOptionNew];
 }
 
 - (void)viewFrameChanged:(TNKeyValueObserve *)observe
