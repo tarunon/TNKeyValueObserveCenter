@@ -18,7 +18,7 @@ TNKeyValueObserve <-> NSNotification
                                                           keyPath:@"frame"
                                                           options:NSKeyValueObservingOptionNew
                                                           handler:^(TNKeyValueObserve *observe) {
-        NSLog(@"====== %@ frame changed(block): %@", observe.observee, observe.change);
+        NSLog(@"====== %@ frame changed(block): %@", observe.object, observe.change);
     }];
     [[TNKeyValueObserveCenter defaultCenter] addObserver:self
                                                   action:@selector(viewFrameChanged:)
@@ -29,5 +29,5 @@ TNKeyValueObserve <-> NSNotification
 
 - (void)viewFrameChanged:(TNKeyValueObserve *)observe
 {
-    NSLog(@"====== %@ frame changed(selector): %@", observe.observee, observe.change);
+    NSLog(@"====== %@ frame changed(selector): %@", observe.object, observe.change);
 }
