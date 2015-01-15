@@ -80,7 +80,10 @@
 
 - (void)performActionWithObject:(id)object change:(NSDictionary *)change
 {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
     [_observer performSelector:_action withObject:[[TNKeyValueObserve alloc] initWithObject:object change:change]];
+#pragma clang diagnostic pop
 }
 
 @end
