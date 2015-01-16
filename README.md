@@ -4,7 +4,12 @@
 Key-Value ObservingをNSNotificationライクに使用するためのクラス。  
 TNKeyValueObserveCenter <-> NSNotificationCenter  
 TNKeyValueObserve <-> NSNotification  
-純正KVOと異なり、removeObserverをdealloc時に記述する必要はない。  
+純正KVOと異なり、removeObserverをdealloc時に記述する必要はない。 
+
+
+##Pod
+pod 'TNKeyValueObserveCenter', :git => 'https://github.com/tarunon/TNKeyValueObserveCenter.git'
+
 
 ##サンプル
 ```objc
