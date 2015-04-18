@@ -1,17 +1,18 @@
 #TNKeyValueObserveCenter
 
-##使い方
-Key-Value ObservingをNSNotificationライクに使用するためのクラス。  
+Key-Value Observer like NSNotification.
+
 TNKeyValueObserveCenter <-> NSNotificationCenter  
 TNKeyValueObserve <-> NSNotification  
-純正KVOと異なり、removeObserverをdealloc時に記述する必要はない。 
 
+##How To
+- Add observer using TNKeyValueObserveCenter.
+- Get object and change from TNKeyValueObserve. It's observed methods first argument.
 
 ##Pod
 pod 'TNKeyValueObserveCenter', :git => 'https://github.com/tarunon/TNKeyValueObserveCenter.git'
 
-
-##サンプル
+##Sample
 ```objc
 
 // In your ViewController
