@@ -8,14 +8,14 @@
 
 Pod::Spec.new do |s|
   s.name         = "TNKeyValueObserveCenter"
-  s.version      = "0.0.1"
+  s.version      = "0.0.2"
   s.summary      = "TNKeyValueObserveCenter is a Class for using Key-Value Observing like NSNotification."
   s.homepage     = "https://github.com/tarunon/TNKeyValueObserveCenter"
   s.license      = { :type => "MIT", :file => "LICENSE.txt" }
   s.author             = { "tarunon" => "croissant9603@gmail.com" }
   s.ios.deployment_target = "5.0"
   s.osx.deployment_target = "10.8"
-  s.source       = { :git => "https://github.com/tarunon/TNKeyValueObserveCenter.git", :tag => "0.0.1" }
+  s.source       = { :git => "https://github.com/tarunon/TNKeyValueObserveCenter.git", :branch => "master" }
   s.source_files  = "TNKeyValueObserveCenter", "TNKeyValueObserveCenter/*.{h,m}"
   s.requires_arc = true
 end

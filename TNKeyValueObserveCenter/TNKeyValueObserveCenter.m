@@ -100,7 +100,7 @@ static void *actionContainer_TNKeyValueObserveKey = &actionContainer_TNKeyValueO
 - (void)setActionContainer_TNKeyValueObserve:(TNKeyValueObserveActionContainer *)actionContainer_TNKeyValueObserve
 {
     actionContainer_TNKeyValueObserve.anObject = self;
-    objc_setAssociatedObject(self, actionContainer_TNKeyValueObserveKey, actionContainer_TNKeyValueObserve, OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, actionContainer_TNKeyValueObserveKey, actionContainer_TNKeyValueObserve, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
